@@ -5,9 +5,29 @@ import { sucessresponse } from "../../common/utlis/success.response.js";
 import { rotateToken } from "../../common/security/index.js";
 import { RoleEnum, TokenTypeEnum } from "../../common/enum/index.js";
 import { validation } from "../../middleware/validation/validation.middleware.js";
+import { uploadMiddleware } from "../../middleware/multer.middleware.js";
+import { fileValidation, localFileUpload } from "../../common/utlis/index.js";
 import * as userValidation from "./user.validation.js";
 
 const router=Router()
+
+
+// Upload Profile Image
+router.patch(
+    "/profile-image",
+    authentication(),
+    uploadMiddleware({
+        isRequired:true,
+        multerMiddleware:localFileUpload({maxFileSize:2}).single("attachment"),
+        customPath:"users",
+        validation:fileValidation.image
+    }),
+    async(req,res,next)=>{
+        req.user.image=req.file.finalPath
+        await req.user.save()
+        return sucessresponse({res,data:{user:req.user}})
+    }
+)
 
 
 // Rotate Token

@@ -12,6 +12,7 @@ import { startserver } from "./DB/database.connection.js"
 const app=express()
 startserver(app,PORT)
 app.use(express.json())
+app.use("/assets",express.static("assets"))
 app.all("/",(req,res)=>{
     res.status(200).send({message:"welcome"})
 })
