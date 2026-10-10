@@ -1,5 +1,5 @@
 
-import { conflictException, notFoundException, tooManyRequestException, unauthorizedException } from "../../common/execption/index.js"
+import { conflictException, forbiddenException, notFoundException, tooManyRequestException, unauthorizedException } from "../../common/execption/index.js"
 import { createOne, findOne } from "../../common/repository/index.js"
 import { decryption, encryption } from "../../common/security/encryption.security.js"
 import { compare, createLoginCredentials, hash, sendEmailOtp, verifyEmailOtp, verifyGoogleToken } from "../../common/security/index.js"
@@ -36,7 +36,36 @@ export const signup=async({email,password,username,phone})=>{
             phone:await encryption(phone)
         }
     })
+    await sendEmailOtp({email,subject:EmailSubjectEnum.CONFIRM_EMAIL})
     return user
+}
+
+// Confirm Email
+export const confirmEmail=async({email,otp})=>{
+    const account=await findOne({
+        model:UserModel,
+        filter:{email,provider:ProviderEnum.SYSTEM,confirmEmail:null}
+    })
+    if(!account){
+        notFoundException("Invalid account")
+    }
+    await verifyEmailOtp({email,subject:EmailSubjectEnum.CONFIRM_EMAIL,otp})
+    account.confirmEmail=new Date()
+    await account.save()
+    return true
+}
+
+// Resend Confirm Email Otp
+export const resendConfirmEmail=async({email})=>{
+    const account=await findOne({
+        model:UserModel,
+        filter:{email,provider:ProviderEnum.SYSTEM,confirmEmail:null}
+    })
+    if(!account){
+        notFoundException("Invalid account")
+    }
+    await sendEmailOtp({email,subject:EmailSubjectEnum.CONFIRM_EMAIL})
+    return true
 }
 
 export const login=async({email,password},issuer)=>{
@@ -52,6 +81,10 @@ export const login=async({email,password},issuer)=>{
     }
     if(account.provider!==ProviderEnum.SYSTEM){
         unauthorizedException("this email is registered with google, please login with google")
+    }
+
+    if(!account.confirmEmail){
+        forbiddenException("please confirm your email first")
     }
 
     // Account Ban Check

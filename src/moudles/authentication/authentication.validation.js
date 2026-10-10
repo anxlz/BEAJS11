@@ -43,3 +43,16 @@ export const confirmTwoStepVerification=z.object({
         otp:z.coerce.string().min(4).max(8)
     })
 })
+
+export const confirmEmail=z.object({
+    body:z.strictObject({
+        email:generalValidationFields.email,
+        otp:z.coerce.string().min(4).max(8)
+    })
+})
+
+export const resendConfirmEmail=z.object({
+    body:z.strictObject({
+        email:generalValidationFields.email
+    })
+})

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { confirmTwoStepVerification, enableTwoStepVerification, getprofileByID, login, loginConfirmation, loginWithGmail, signup } from "./authentication.service.js";
+import { confirmEmail, confirmTwoStepVerification, enableTwoStepVerification, getprofileByID, login, loginConfirmation, loginWithGmail, resendConfirmEmail, signup } from "./authentication.service.js";
 import { sucessresponse } from "../../common/utlis/success.response.js";
 import { authentication } from "../../middleware/authentication/authentication.middleware.js";
 import { validation } from "../../middleware/validation/validation.middleware.js";
@@ -10,6 +10,20 @@ const router=Router()
 router.post("/signup",validation(authValidation.signup),async (req , res ,next)=>{
     const data=await signup(req.body)
     return sucessresponse({res,data,status:201})
+})
+
+
+// Confirm Email
+router.patch("/confirm-email",validation(authValidation.confirmEmail),async(req,res,next)=>{
+    const data=await confirmEmail(req.body)
+    return sucessresponse({res,data})
+})
+
+
+// Resend Confirm Email Otp
+router.patch("/resend-confirm-email",validation(authValidation.resendConfirmEmail),async(req,res,next)=>{
+    const data=await resendConfirmEmail(req.body)
+    return sucessresponse({res,data})
 })
 
 

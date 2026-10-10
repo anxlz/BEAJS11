@@ -42,7 +42,6 @@ const UserSchema=new mongoose.Schema({
     },
     phone:String,
     DOB:Date,
-    confirmEmail:Date,
     image:String,
     coverImage:[String],
     deletedAt:{
